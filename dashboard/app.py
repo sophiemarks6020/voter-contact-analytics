@@ -28,7 +28,7 @@ with col1:
 with col2:
     st.metric("Avg Dem Shift", f"+{df['dem_shift'].mean():.2f}%")
 with col3:
-    st.metric("States Dems Gained", len(df[df['dem_shift'] > 0]))
+    st.metric("States with Dem Vote Share Increase", f"{len(df[df['dem_shift'] > 0])} of {len(df)}")
 with col4:
     st.metric("Biggest Gain", f"{df.loc[df['dem_shift'].idxmax(), 'state_po']} +{df['dem_shift'].max():.2f}%")
 
