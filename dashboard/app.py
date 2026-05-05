@@ -176,7 +176,11 @@ fig1 = px.bar(
     labels={'dem_shift': 'Shift in Vote Share (%)', 'state_po': 'State'},
     height=800
 )
-fig1.update_layout(coloraxis_showscale=False)
+fig1.update_layout(
+    coloraxis_showscale=False,
+    xaxis=dict(fixedrange=True),
+    yaxis=dict(fixedrange=True)
+)
 st.plotly_chart(fig1, use_container_width=True, config={
     'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
     'displayModeBar': False
@@ -197,7 +201,8 @@ fig3 = px.bar(
 )
 fig3.update_layout(
     coloraxis_showscale=False,
-    xaxis=dict(tickformat=',')
+    xaxis=dict(tickformat=',', fixedrange=True),
+    yaxis=dict(fixedrange=True)
 )
 st.plotly_chart(fig3, use_container_width=True, config={
     'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
