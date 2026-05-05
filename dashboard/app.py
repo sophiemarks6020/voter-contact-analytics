@@ -2,7 +2,6 @@ import streamlit as st
 import duckdb
 import pandas as pd
 import plotly.express as px
-
 import os
 
 DB_PATH = ':memory:'
@@ -177,6 +176,13 @@ regions = {
 selected_region = st.sidebar.selectbox("Filter by Region", list(regions.keys()))
 selected_states = st.sidebar.multiselect("Or select specific states", sorted(df['state'].tolist()), default=[])
 
+st.sidebar.markdown("---")
+st.sidebar.subheader("County Drill Down")
+selected_drill_state = st.sidebar.selectbox(
+    "Select a state for county analysis",
+    ["None"] + sorted(df['state'].tolist())
+)
+
 if selected_states:
     df = df[df['state'].isin(selected_states)]
 elif selected_region != "All States":
@@ -348,12 +354,9 @@ Select a state below to explore which counties drove Democratic vote share shift
 Note: County-level data is available for states that report unified vote totals.
 """)
 
-selected_drill_state = st.selectbox(
-    "Select a state for county analysis",
-    ["Select a state..."] + sorted(df['state'].tolist())
-)
 
-if selected_drill_state != "Select a state...":
+
+if selected_drill_state != "None":
     county_df = conn.execute(f"""
         SELECT * FROM mart_county_trends
         WHERE state = '{selected_drill_state}'
