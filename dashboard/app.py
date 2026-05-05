@@ -197,7 +197,7 @@ fig3 = px.bar(
     color='turnout_change',
     color_continuous_scale='Blues',
     labels={'turnout_change': 'Change in Total Votes', 'state_po': 'State'},
-    height=800
+    height=max(400, len(df) * 20)
 )
 fig3.update_layout(
     coloraxis_showscale=False,
