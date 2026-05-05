@@ -478,12 +478,13 @@ The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({botto
 
         fig5 = px.bar(
             chart_df.sort_values('dem_shift'),
+            x='dem_shift',
             y='county_name',
             orientation='h',
             color='dem_shift',
             color_continuous_scale='RdBu',
             labels={'dem_shift': 'Dem Vote Share Shift (%)', 'county_name': 'County'},
-            height=max(400, len(county_df) * 20)
+            height=max(400, len(chart_df) * 25)
         )
         fig5.update_layout(
             coloraxis_showscale=False,
