@@ -488,7 +488,7 @@ The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({botto
         st.plotly_chart(fig5, use_container_width=True, config={'displayModeBar': False})
 
         st.dataframe(
-            county_df[['county_name', 'dem_2016', 'dem_2020', 'dem_shift', 'rep_2016', 'rep_2020', 'rep_shift']].reset_index(drop=True),
+            county_df[['county_name', 'dem_shift', 'rep_shift', 'dem_2016', 'dem_2020', 'rep_2016', 'rep_2020']].reset_index(drop=True),
             use_container_width=True
         )
     else:
