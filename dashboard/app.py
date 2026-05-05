@@ -463,7 +463,7 @@ The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({botto
 {bottom3.iloc[2]['county_name'].title()} ({bottom3.iloc[2]['dem_shift']}%).
         """)
 
-        st.markdown(f"**{total_counties} counties in {selected_drill_state.title()}**")elected_drill_state != "None":
+        st.markdown(f"**{total_counties} counties in {selected_drill_state.title()}**")
         county_df = conn.execute(f"""
             SELECT * FROM mart_county_trends
             WHERE state = '{selected_drill_state}'
