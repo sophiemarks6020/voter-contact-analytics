@@ -177,7 +177,10 @@ fig1 = px.bar(
     height=800
 )
 fig1.update_layout(coloraxis_showscale=False)
-st.plotly_chart(fig1, use_container_width=True, config={'staticPlot': True})
+st.plotly_chart(fig1, use_container_width=True, config={
+    'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+    'displayModeBar': False
+})
 st.markdown("---")
 
 st.subheader("Voter Turnout Change by State (2016 to 2020)")
@@ -196,7 +199,10 @@ fig3.update_layout(
     coloraxis_showscale=False,
     xaxis=dict(tickformat=',')
 )
-st.plotly_chart(fig3, use_container_width=True, config={'staticPlot': True})
+st.plotly_chart(fig3, use_container_width=True, config={
+    'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+    'displayModeBar': False
+})
 
 st.markdown("---")
 
