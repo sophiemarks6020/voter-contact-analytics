@@ -5,7 +5,7 @@ import plotly.express as px
 
 import os
 
-DB_PATH = 'data/election.duckdb'
+DB_PATH = ':memory:'
 CSV_PATH = 'raw/election_data.csv'
 
 @st.cache_resource
