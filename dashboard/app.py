@@ -430,7 +430,7 @@ with tab2:
     st.subheader("County-Level Deep Dive")
     st.markdown("Select a state to explore which counties drove Democratic vote share shifts between 2016 and 2020.")
 
-    county_states = conn.execute("SELECT DISTINCT state FROM mart_county_trends ORDER BY state").df()['state'].tolist()
+    county_states = conn.execute("SELECT DISTINCT state FROM mart_county_trends WHERE state != 'DISTRICT OF COLUMBIA' ORDER BY state").df()['state'].tolist()
 
     selected_drill_state = st.selectbox(
         "Select a state",
