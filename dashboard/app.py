@@ -11,28 +11,19 @@ CSV_PATH = 'raw/election_data.csv'
 def get_connection():
     conn = duckdb.connect(DB_PATH)
     conn.execute("""
-        CREATE VIEW IF NOT EXISTS stg_election AS
-        SELECT
-            year, state, state_po, county_name, candidate, party, mode,
-            candidatevotes, totalvotes,
-            round(candidatevotes * 100.0 / totalvotes, 2) as vote_share_pct
-        FROM read_csv_auto('""" + CSV_PATH + """', nullstr='NA', sample_size=-1)
-        WHERE totalvotes > 0 AND candidatevotes IS NOT NULL
-    """)
-    conn.execute("""
-        CREATE VIEW IF NOT EXISTS mart_state_trends AS
-        WITH clean_states AS (
-            SELECT year, state, state_po, party,
+        CREATE VIEW IF NOT EXISTS mart_county_trends AS
+        WITH clean_counties AS (
+            SELECT year, state, state_po, county_name, party,
                 sum(candidatevotes) as total_candidate_votes,
-                sum(totalvotes) as total_votes
+                max(totalvotes) as total_votes
             FROM stg_election
             WHERE year IN (2016, 2020)
             AND party IN ('DEMOCRAT', 'REPUBLICAN')
             AND mode = 'TOTAL'
-            GROUP BY year, state, state_po, party
+            GROUP BY year, state, state_po, county_name, party
         ),
-        messy_states AS (
-            SELECT year, state, state_po, party,
+        messy_counties AS (
+            SELECT year, state, state_po, county_name, party,
                 sum(candidatevotes) as total_candidate_votes
             FROM stg_election
             WHERE year IN (2016, 2020)
@@ -48,66 +39,35 @@ def get_connection():
                 HAVING count(DISTINCT year) < 2
             )
             AND mode != 'TOTAL'
-            GROUP BY year, state, state_po, party
+            GROUP BY year, state, state_po, county_name, party
         ),
-        messy_totals AS (
-            SELECT year, state, sum(candidatevotes) as total_votes
+        messy_county_totals AS (
+            SELECT year, state, county_name,
+                sum(candidatevotes) as total_votes
             FROM stg_election
             WHERE year IN (2016, 2020)
-            AND state IN (SELECT DISTINCT state FROM messy_states)
+            AND state IN (SELECT DISTINCT state FROM messy_counties)
             AND mode != 'TOTAL'
-            GROUP BY year, state
+            GROUP BY year, state, county_name
         ),
         messy_combined AS (
-            SELECT m.year, m.state, m.state_po, m.party,
+            SELECT m.year, m.state, m.state_po, m.county_name, m.party,
                 m.total_candidate_votes, t.total_votes
-            FROM messy_states m
-            JOIN messy_totals t ON m.state = t.state AND m.year = t.year
+            FROM messy_counties m
+            JOIN messy_county_totals t
+                ON m.state = t.state
+                AND m.year = t.year
+                AND m.county_name = t.county_name
         ),
         combined AS (
-            SELECT * FROM clean_states
+            SELECT * FROM clean_counties
             UNION ALL
             SELECT * FROM messy_combined
         ),
         vote_share AS (
-            SELECT year, state, state_po, party, total_votes,
-                round(total_candidate_votes * 100.0 / total_votes, 2) as vote_share_pct
-            FROM combined WHERE total_votes > 0
-        ),
-        pivoted AS (
-            SELECT state, state_po,
-                max(CASE WHEN year = 2016 AND party = 'DEMOCRAT' THEN vote_share_pct END) as dem_2016,
-                max(CASE WHEN year = 2020 AND party = 'DEMOCRAT' THEN vote_share_pct END) as dem_2020,
-                max(CASE WHEN year = 2016 AND party = 'REPUBLICAN' THEN vote_share_pct END) as rep_2016,
-                max(CASE WHEN year = 2020 AND party = 'REPUBLICAN' THEN vote_share_pct END) as rep_2020,
-                max(CASE WHEN year = 2016 THEN total_votes END) as total_votes_2016,
-                max(CASE WHEN year = 2020 THEN total_votes END) as total_votes_2020
-            FROM vote_share GROUP BY state, state_po
-        )
-        SELECT state, state_po, dem_2016, dem_2020, rep_2016, rep_2020,
-            round(dem_2020 - dem_2016, 2) as dem_shift,
-            round(rep_2020 - rep_2016, 2) as rep_shift,
-            total_votes_2020 - total_votes_2016 as turnout_change
-        FROM pivoted
-        WHERE dem_2016 IS NOT NULL AND dem_2020 IS NOT NULL
-        ORDER BY dem_shift DESC
-    """)
-    conn.execute("""
-        CREATE VIEW IF NOT EXISTS mart_county_trends AS
-        WITH base AS (
-            SELECT year, state, state_po, county_name, party,
-                sum(candidatevotes) as total_candidate_votes,
-                max(totalvotes) as total_votes
-            FROM stg_election
-            WHERE year IN (2016, 2020)
-            AND party IN ('DEMOCRAT', 'REPUBLICAN')
-            AND mode = 'TOTAL'
-            GROUP BY year, state, state_po, county_name, party
-        ),
-        vote_share AS (
             SELECT year, state, state_po, county_name, party, total_votes,
                 round(total_candidate_votes * 100.0 / total_votes, 2) as vote_share_pct
-            FROM base WHERE total_votes > 0
+            FROM combined WHERE total_votes > 0
         ),
         pivoted AS (
             SELECT state, state_po, county_name,
