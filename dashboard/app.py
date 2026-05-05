@@ -181,6 +181,32 @@ if selected_states:
 elif selected_region != "All States":
     df = df[df['state'].isin(regions[selected_region])]
 
+st.markdown("""
+<style>
+.stTabs [data-baseweb="tab-list"] {
+    gap: 24px;
+    background-color: #f0f2f6;
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+.stTabs [data-baseweb="tab"] {
+    height: 50px;
+    padding: 0px 24px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 6px;
+    color: #555;
+}
+.stTabs [aria-selected="true"] {
+    background-color: #ffffff;
+    color: #1a1a2e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+</style>
+""", unsafe_allow_html=True)
+
+tab1, tab2 = st.tabs(["State Overview", "County Deep Dive"])
+
 tab1, tab2 = st.tabs(["State Overview", "County Deep Dive"])
 
 with tab1:
