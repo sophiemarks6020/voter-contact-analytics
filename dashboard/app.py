@@ -174,7 +174,7 @@ fig1 = px.bar(
     color='dem_shift',
     color_continuous_scale='RdBu',
     labels={'dem_shift': 'Shift in Vote Share (%)', 'state_po': 'State'},
-    height=800
+    height=max(400, len(df) * 20)
 )
 fig1.update_layout(
     coloraxis_showscale=False,
