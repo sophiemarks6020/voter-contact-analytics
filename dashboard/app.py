@@ -495,7 +495,17 @@ The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({botto
 
         st.markdown("---")
         st.subheader(f"2016 vs 2020 Democratic Vote Share - {selected_drill_state.title()} Counties")
-        st.markdown("Each dot is a county. Dots above the line improved from 2016 to 2020. Hover for details.")
+        st.markdown("""
+Each dot represents a county. The horizontal axis shows Democratic vote share in 2016,
+and the vertical axis shows Democratic vote share in 2020. Dots above the dashed
+reference line improved their Democratic vote share from 2016 to 2020, while dots
+below it lost ground. Dot color reflects the magnitude of the shift - blue indicates
+larger Democratic gains, red indicates smaller gains.
+
+The reference line is a 45-degree equality line mathematically derived from the
+actual data range of the selected state, ensuring it accurately reflects the scale
+of the county-level data.
+        """)
 
         min_c = int(county_df[['dem_2016', 'dem_2020']].min().min()) - 2
         max_c = int(county_df[['dem_2016', 'dem_2020']].max().max()) + 2
