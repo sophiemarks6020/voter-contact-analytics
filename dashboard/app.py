@@ -154,11 +154,14 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("States Analyzed", len(df))
 with col2:
-    st.metric("Avg Dem Shift", f"+{df['dem_shift'].mean():.2f}%")
+    st.metric("Avg Dem Shift", f"+{df['dem_shift'].mean():.2f}%" if len(df) > 0 else "N/A")
 with col3:
     st.metric("States w/ Dem Vote Share Increase", f"{len(df[df['dem_shift'] > 0])} of {len(df)}")
 with col4:
-    st.metric("Biggest Gain", f"{df.loc[df['dem_shift'].idxmax(), 'state_po']} +{df['dem_shift'].max():.2f}%")
+    if len(df) > 0:
+        st.metric("Biggest Gain", f"{df.loc[df['dem_shift'].idxmax(), 'state_po']} +{df['dem_shift'].max():.2f}%")
+    else:
+        st.metric("Biggest Gain", "N/A")
 
 st.markdown("---")
 
