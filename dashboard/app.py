@@ -493,6 +493,37 @@ The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({botto
         )
         st.plotly_chart(fig5, use_container_width=True, config={'displayModeBar': False})
 
+        st.markdown("---")
+        st.subheader(f"2016 vs 2020 Democratic Vote Share - {selected_drill_state.title()} Counties")
+        st.markdown("Each dot is a county. Dots above the line improved from 2016 to 2020. Hover for details.")
+
+        min_c = int(county_df[['dem_2016', 'dem_2020']].min().min()) - 2
+        max_c = int(county_df[['dem_2016', 'dem_2020']].max().max()) + 2
+
+        fig6 = px.scatter(
+            chart_df,
+            x='dem_2016',
+            y='dem_2020',
+            hover_name='county_name',
+            color='dem_shift',
+            color_continuous_scale='RdBu',
+            hover_data={'dem_2016': True, 'dem_2020': True, 'dem_shift': True},
+            labels={'dem_2016': 'Dem Vote Share 2016 (%)', 'dem_2020': 'Dem Vote Share 2020 (%)', 'dem_shift': 'Dem Shift (%)'},
+            height=500
+        )
+        fig6.add_shape(type='line', x0=min_c, y0=min_c, x1=max_c, y1=max_c,
+                       line=dict(color='gray', dash='dash'))
+        fig6.update_traces(marker=dict(size=8))
+        fig6.update_layout(
+            dragmode='pan',
+            xaxis=dict(fixedrange=False),
+            yaxis=dict(fixedrange=False)
+        )
+        st.plotly_chart(fig6, use_container_width=True, config={
+            'scrollZoom': True,
+            'dragmode': 'pan'
+        })
+
         st.dataframe(
             county_df[['county_name', 'dem_shift', 'rep_shift', 'dem_2016', 'dem_2020', 'rep_2016', 'rep_2020']].reset_index(drop=True),
             use_container_width=True
