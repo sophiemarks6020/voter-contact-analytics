@@ -513,7 +513,7 @@ of the county-level data.
         max_c = int(county_df[['dem_2016', 'dem_2020']].max().max()) + 2
 
         fig6 = px.scatter(
-            chart_df,
+            county_df,
             x='dem_2016',
             y='dem_2020',
             hover_name='county_name',
