@@ -207,7 +207,6 @@ st.markdown("""
 
 tab1, tab2 = st.tabs(["State Overview", "County Deep Dive"])
 
-tab1, tab2 = st.tabs(["State Overview", "County Deep Dive"])
 
 with tab1:
     col1, col2, col3, col4 = st.columns(4)
