@@ -240,7 +240,11 @@ fig2.update_layout(
     xaxis=dict(fixedrange=False),
     yaxis=dict(fixedrange=False)
 )
-st.plotly_chart(fig2, use_container_width=True, config={'scrollZoom': True, 'modeBarButtonsToRemove': ['select2d', 'lasso2d']})
+st.plotly_chart(fig2, use_container_width=True, config={
+    'scrollZoom': True,
+    'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
+    'dragmode': 'pan'
+})
 
 st.markdown("---")
 
