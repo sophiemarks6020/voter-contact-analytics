@@ -163,6 +163,13 @@ df = conn.execute("""
     WHERE state != 'DISTRICT OF COLUMBIA'
 """).df()
 
+if 'drill_state' not in st.session_state:
+    st.session_state.drill_state = 'None'
+if 'prev_region' not in st.session_state:
+    st.session_state.prev_region = 'All States'
+if 'prev_states' not in st.session_state:
+    st.session_state.prev_states = []
+
 st.sidebar.title("Filters")
 regions = {
     "All States": list(df['state']),
@@ -176,12 +183,19 @@ regions = {
 selected_region = st.sidebar.selectbox("Filter by Region", list(regions.keys()))
 selected_states = st.sidebar.multiselect("Or select specific states", sorted(df['state'].tolist()), default=[])
 
+if selected_region != st.session_state.prev_region or selected_states != st.session_state.prev_states:
+    st.session_state.drill_state = 'None'
+    st.session_state.prev_region = selected_region
+    st.session_state.prev_states = selected_states
+
 st.sidebar.markdown("---")
 st.sidebar.subheader("County Drill Down")
 selected_drill_state = st.sidebar.selectbox(
     "Select a state for county analysis",
-    ["None"] + sorted(df['state'].tolist())
+    ["None"] + sorted(df['state'].tolist()),
+    index=(["None"] + sorted(df['state'].tolist())).index(st.session_state.drill_state)
 )
+st.session_state.drill_state = selected_drill_state
 
 if selected_states:
     df = df[df['state'].isin(selected_states)]
