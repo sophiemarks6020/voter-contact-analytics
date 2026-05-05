@@ -3,39 +3,74 @@ import duckdb
 import pandas as pd
 import plotly.express as px
 
-# Connect to DuckDB
 conn = duckdb.connect('C:/Users/13609/voter_contact_analysis/data/election.duckdb')
 
-# Page config
 st.set_page_config(
     page_title="Voter Contact Analytics",
-    page_icon="🗳️",
+    page_icon="",
     layout="wide"
 )
 
-# Title
-st.title("🗳️ Voter Contact Effectiveness Dashboard")
-st.markdown("**America Votes | 2016–2020 Presidential Election Analysis**")
+st.title(" U.S. Presidential Election Shift Analysis (2016-2020)")
+st.markdown("**Built for America Votes | Analyzing Democratic Vote Share Trends by State**")
+
 st.markdown("---")
 
-# Load data
-df = conn.execute("SELECT * FROM mart_state_trends").df()
+st.markdown("""
+### About This Dashboard
+This dashboard analyzes shifts in Democratic presidential vote share between
+the 2016 and 2020 U.S. presidential elections using county-level returns
+aggregated to the state level.
 
-# KPI Row
+**Data Source:** MIT Election Lab - County Presidential Election Returns 2000-2024
+
+**Methodology:** Vote share is calculated as each party's total votes divided
+by total votes cast per state. Shift is the difference in Democratic vote share
+between 2016 and 2020.
+
+**Purpose:** To identify which states showed the most movement toward Democratic
+candidates - informing where progressive voter contact programs may have had
+the greatest impact and where future investment could be most effective.
+""")
+
+st.markdown("---")
+
+df = conn.execute("""
+    SELECT * FROM mart_state_trends
+    WHERE state != 'DISTRICT OF COLUMBIA'
+""").df()
+
+st.sidebar.title("Filters")
+regions = {
+    "All States": list(df['state']),
+    "Swing States": ["PENNSYLVANIA", "MICHIGAN", "WISCONSIN", "ARIZONA", "GEORGIA", "NEVADA", "NORTH CAROLINA"],
+    "Northeast": ["CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", "NEW JERSEY", "NEW YORK", "PENNSYLVANIA", "RHODE ISLAND", "VERMONT"],
+    "Midwest": ["ILLINOIS", "INDIANA", "IOWA", "KANSAS", "MICHIGAN", "MINNESOTA", "MISSOURI", "NEBRASKA", "NORTH DAKOTA", "OHIO", "SOUTH DAKOTA", "WISCONSIN"],
+    "South": ["ALABAMA", "ARKANSAS", "FLORIDA", "GEORGIA", "KENTUCKY", "LOUISIANA", "MARYLAND", "MISSISSIPPI", "NORTH CAROLINA", "OKLAHOMA", "SOUTH CAROLINA", "TENNESSEE", "TEXAS", "VIRGINIA", "WEST VIRGINIA"],
+    "West": ["ALASKA", "ARIZONA", "CALIFORNIA", "COLORADO", "HAWAII", "IDAHO", "MONTANA", "NEVADA", "NEW MEXICO", "OREGON", "UTAH", "WASHINGTON", "WYOMING"]
+}
+
+selected_region = st.sidebar.selectbox("Filter by Region", list(regions.keys()))
+selected_states = st.sidebar.multiselect("Or select specific states", sorted(df['state'].tolist()), default=[])
+
+if selected_states:
+    df = df[df['state'].isin(selected_states)]
+elif selected_region != "All States":
+    df = df[df['state'].isin(regions[selected_region])]
+
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("States Analyzed", len(df))
 with col2:
     st.metric("Avg Dem Shift", f"+{df['dem_shift'].mean():.2f}%")
 with col3:
-    st.metric("States with Dem Vote Share Increase", f"{len(df[df['dem_shift'] > 0])} of {len(df)}")
+    st.metric("States w/ Dem Vote Share Increase", f"{len(df[df['dem_shift'] > 0])} of {len(df)}")
 with col4:
     st.metric("Biggest Gain", f"{df.loc[df['dem_shift'].idxmax(), 'state_po']} +{df['dem_shift'].max():.2f}%")
 
 st.markdown("---")
 
-# Bar chart - dem shift by state
-st.subheader("Democratic Vote Share Shift by State (2016 → 2020)")
+st.subheader("Democratic Vote Share Shift by State (2016 to 2020)")
 fig1 = px.bar(
     df.sort_values('dem_shift'),
     x='dem_shift',
@@ -51,23 +86,116 @@ st.plotly_chart(fig1, use_container_width=True)
 
 st.markdown("---")
 
-# Scatter - 2016 vs 2020
+st.subheader("Voter Turnout Change by State (2016 to 2020)")
+st.caption("How many more total votes were cast in 2020 vs 2016.")
+fig3 = px.bar(
+    df.sort_values('turnout_change'),
+    x='turnout_change',
+    y='state_po',
+    orientation='h',
+    color='turnout_change',
+    color_continuous_scale='Blues',
+    labels={'turnout_change': 'Change in Total Votes', 'state_po': 'State'},
+    height=800
+)
+fig3.update_layout(
+    coloraxis_showscale=False,
+    xaxis=dict(tickformat=',')
+)
+st.plotly_chart(fig3, use_container_width=True)
+
+st.markdown("---")
+
 st.subheader("2016 vs 2020 Democratic Vote Share by State")
+st.markdown("""
+Each dot represents a state. The horizontal axis shows Democratic vote share in 2016,
+and the vertical axis shows Democratic vote share in 2020. The dashed diagonal line
+is a reference line representing zero change - states whose dots fall above it improved
+their Democratic vote share from 2016 to 2020, while states below it lost ground.
+
+Dot color reflects the magnitude of the shift: blue dots indicate larger Democratic
+gains, while red dots indicate smaller gains. The further a dot sits above the line,
+the more significant the improvement. Hover over any dot to see the state name, both
+vote share figures, and the net shift.
+
+The reference line is mathematically derived from the actual data range - it spans
+from the minimum to maximum vote share values observed across both years, ensuring
+the line accurately reflects the scale of the data.
+""")
+
+min_val = int(df[['dem_2016', 'dem_2020']].min().min()) - 2
+max_val = int(df[['dem_2016', 'dem_2020']].max().max()) + 2
+
 fig2 = px.scatter(
     df,
     x='dem_2016',
     y='dem_2020',
-    text='state_po',
-    labels={'dem_2016': 'Dem Vote Share 2016 (%)', 'dem_2020': 'Dem Vote Share 2020 (%)'},
-    height=500
+    hover_name='state',
+    color='dem_shift',
+    color_continuous_scale='RdBu',
+    hover_data={'state_po': True, 'dem_2016': True, 'dem_2020': True, 'dem_shift': True},
+    labels={'dem_2016': 'Dem Vote Share 2016 (%)', 'dem_2020': 'Dem Vote Share 2020 (%)', 'dem_shift': 'Dem Shift (%)'},
+    height=550
 )
-fig2.add_shape(type='line', x0=20, y0=20, x1=70, y1=70,
+fig2.add_shape(type='line', x0=min_val, y0=min_val, x1=max_val, y1=max_val,
                line=dict(color='gray', dash='dash'))
-fig2.update_traces(textposition='top center')
-st.plotly_chart(fig2, use_container_width=True)
+fig2.update_traces(marker=dict(size=10))
+fig2.update_layout(dragmode='pan')
+st.plotly_chart(fig2, use_container_width=True, config={'scrollZoom': True})
 
 st.markdown("---")
 
-# Data table
+st.subheader("Turnout Change vs Democratic Vote Share Shift")
+st.markdown("""
+This chart explores whether states with higher voter turnout increases also saw
+larger Democratic vote share gains. A positive correlation would suggest that
+progressive voter mobilization efforts drove Democratic performance improvements.
+
+Nationally, the correlation is weakly negative - suggesting persuasion of existing
+voters drove Democratic gains more than raw turnout increases. However, when filtered
+to swing states specifically, the correlation turns positive - indicating that in
+competitive states, voter mobilization efforts were more directly tied to Democratic
+vote share improvements. Use the sidebar filter to explore this pattern.
+""")
+
+fig4 = px.scatter(
+    df,
+    x='turnout_change',
+    y='dem_shift',
+    hover_name='state',
+    hover_data={'state_po': True, 'turnout_change': True, 'dem_shift': True},
+    labels={'turnout_change': 'Change in Total Votes', 'dem_shift': 'Dem Vote Share Shift (%)'},
+    trendline='ols',
+    height=500
+)
+fig4.update_traces(marker=dict(size=10, color='steelblue'),
+                   selector=dict(mode='markers'))
+st.plotly_chart(fig4, use_container_width=True)
+
+st.markdown("---")
+
 st.subheader("Full State-Level Data")
-st.dataframe(df.sort_values('dem_shift', ascending=False), use_container_width=True)
+display_df = df.sort_values('dem_shift', ascending=False).copy()
+display_df = display_df[['state', 'state_po', 'dem_shift', 'rep_shift', 'dem_2016', 'dem_2020', 'rep_2016', 'rep_2020', 'turnout_change']]
+display_df.index = range(1, len(display_df) + 1)
+display_df['dem_2016'] = display_df['dem_2016'].map(lambda x: f"{x}%")
+display_df['dem_2020'] = display_df['dem_2020'].map(lambda x: f"{x}%")
+display_df['rep_2016'] = display_df['rep_2016'].map(lambda x: f"{x}%")
+display_df['rep_2020'] = display_df['rep_2020'].map(lambda x: f"{x}%")
+display_df['dem_shift'] = display_df['dem_shift'].map(lambda x: f"{x}%")
+display_df['rep_shift'] = display_df['rep_shift'].map(lambda x: f"{x}%")
+st.dataframe(display_df, use_container_width=True)
+
+st.markdown("---")
+
+st.markdown("""
+### Methodology Note
+**Data Source:** MIT Election Lab - County Presidential Election Returns 2000-2024
+
+**Coverage:** All 50 U.S. states (Washington D.C. excluded as it has no Electoral College votes).
+
+**Vote Reporting:** States report election results differently - some report a single unified
+total, others report by voting mode (Election Day, Absentee, Early Vote, etc.).
+This analysis handles both cases: unified totals are used where available,
+and breakdown modes are summed where they are not, ensuring all 50 states are represented accurately.
+""")
