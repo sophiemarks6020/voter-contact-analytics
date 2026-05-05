@@ -464,15 +464,20 @@ The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({botto
         """)
 
         st.markdown(f"**{total_counties} counties in {selected_drill_state.title()}**")
-        county_df = conn.execute(f"""
-            SELECT * FROM mart_county_trends
-            WHERE state = '{selected_drill_state}'
-            ORDER BY dem_shift desc
-        """).df()
+        
+        show_all = st.toggle("Show all counties", value=False)
+        
+        if show_all:
+            chart_df = county_df
+        else:
+            chart_df = pd.concat([
+                county_df.head(10),
+                county_df.tail(10)
+            ]).drop_duplicates()
+            st.caption("Showing top 10 and bottom 10 counties by Democratic shift. Toggle above to see all.")
 
         fig5 = px.bar(
-            county_df.sort_values('dem_shift'),
-            x='dem_shift',
+            chart_df.sort_values('dem_shift'),
             y='county_name',
             orientation='h',
             color='dem_shift',
