@@ -93,6 +93,38 @@ def get_connection():
         WHERE dem_2016 IS NOT NULL AND dem_2020 IS NOT NULL
         ORDER BY dem_shift DESC
     """)
+    conn.execute("""
+        CREATE VIEW IF NOT EXISTS mart_county_trends AS
+        WITH base AS (
+            SELECT year, state, state_po, county_name, party,
+                sum(candidatevotes) as total_candidate_votes,
+                max(totalvotes) as total_votes
+            FROM stg_election
+            WHERE year IN (2016, 2020)
+            AND party IN ('DEMOCRAT', 'REPUBLICAN')
+            AND mode = 'TOTAL'
+            GROUP BY year, state, state_po, county_name, party
+        ),
+        vote_share AS (
+            SELECT year, state, state_po, county_name, party, total_votes,
+                round(total_candidate_votes * 100.0 / total_votes, 2) as vote_share_pct
+            FROM base WHERE total_votes > 0
+        ),
+        pivoted AS (
+            SELECT state, state_po, county_name,
+                max(CASE WHEN year = 2016 AND party = 'DEMOCRAT' THEN vote_share_pct END) as dem_2016,
+                max(CASE WHEN year = 2020 AND party = 'DEMOCRAT' THEN vote_share_pct END) as dem_2020,
+                max(CASE WHEN year = 2016 AND party = 'REPUBLICAN' THEN vote_share_pct END) as rep_2016,
+                max(CASE WHEN year = 2020 AND party = 'REPUBLICAN' THEN vote_share_pct END) as rep_2020
+            FROM vote_share GROUP BY state, state_po, county_name
+        )
+        SELECT state, state_po, county_name, dem_2016, dem_2020, rep_2016, rep_2020,
+            round(dem_2020 - dem_2016, 2) as dem_shift,
+            round(rep_2020 - rep_2016, 2) as rep_shift
+        FROM pivoted
+        WHERE dem_2016 IS NOT NULL AND dem_2020 IS NOT NULL
+        ORDER BY state, dem_shift DESC
+    """)
     return conn
 
 conn = get_connection()
