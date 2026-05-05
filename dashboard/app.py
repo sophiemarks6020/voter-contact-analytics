@@ -435,7 +435,7 @@ with tab2:
         ["None"] + county_states
     )
 
-    if sif selected_drill_state != "None":
+    if selected_drill_state != "None":
         county_df = conn.execute(f"""
             SELECT * FROM mart_county_trends
             WHERE state = '{selected_drill_state}'
