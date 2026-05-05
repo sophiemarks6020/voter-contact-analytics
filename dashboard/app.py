@@ -232,7 +232,11 @@ fig2 = px.scatter(
 fig2.add_shape(type='line', x0=min_val, y0=min_val, x1=max_val, y1=max_val,
                line=dict(color='gray', dash='dash'))
 fig2.update_traces(marker=dict(size=10))
-fig2.update_layout(dragmode='pan')
+fig2.update_layout(
+    dragmode='pan',
+    xaxis=dict(fixedrange=False),
+    yaxis=dict(fixedrange=False)
+)
 st.plotly_chart(fig2, use_container_width=True, config={'scrollZoom': True})
 
 st.markdown("---")
