@@ -1,5 +1,4 @@
 data/
-raw/
 voter_analysis/target/
 voter_analysis/logs/
 __pycache__/

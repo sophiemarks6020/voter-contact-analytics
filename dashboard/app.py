@@ -310,6 +310,52 @@ st.dataframe(display_df, use_container_width=True)
 
 st.markdown("---")
 
+st.subheader("County-Level Drill Down")
+st.markdown("""
+Select a state below to explore which counties drove Democratic vote share shifts.
+Note: County-level data is available for states that report unified vote totals.
+""")
+
+selected_drill_state = st.selectbox(
+    "Select a state for county analysis",
+    ["Select a state..."] + sorted(df['state'].tolist())
+)
+
+if selected_drill_state != "Select a state...":
+    county_df = conn.execute(f"""
+        SELECT * FROM mart_county_trends
+        WHERE state = '{selected_drill_state}'
+        ORDER BY dem_shift desc
+    """).df()
+
+    if len(county_df) == 0:
+        st.info(f"County-level data is not available for {selected_drill_state} due to split vote reporting modes in the source data.")
+    else:
+        st.markdown(f"**{len(county_df)} counties in {selected_drill_state}**")
+        fig5 = px.bar(
+            county_df.sort_values('dem_shift'),
+            x='dem_shift',
+            y='county_name',
+            orientation='h',
+            color='dem_shift',
+            color_continuous_scale='RdBu',
+            labels={'dem_shift': 'Dem Vote Share Shift (%)', 'county_name': 'County'},
+            height=max(400, len(county_df) * 20)
+        )
+        fig5.update_layout(
+            coloraxis_showscale=False,
+            xaxis=dict(fixedrange=True),
+            yaxis=dict(fixedrange=True)
+        )
+        st.plotly_chart(fig5, use_container_width=True, config={'displayModeBar': False})
+
+        st.dataframe(
+            county_df[['county_name', 'dem_2016', 'dem_2020', 'dem_shift', 'rep_2016', 'rep_2020', 'rep_shift']].reset_index(drop=True),
+            use_container_width=True
+        )
+
+st.markdown("---")
+
 st.markdown("""
 ### Methodology Note
 **Data Source:** MIT Election Lab - County Presidential Election Returns 2000-2024
