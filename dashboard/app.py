@@ -177,7 +177,7 @@ fig1 = px.bar(
     height=800
 )
 fig1.update_layout(coloraxis_showscale=False)
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig1, use_container_width=Tst.plotly_chart(fig1, use_container_width=True, config={'staticPlot': True})rue)
 
 st.markdown("---")
 
@@ -197,7 +197,7 @@ fig3.update_layout(
     coloraxis_showscale=False,
     xaxis=dict(tickformat=',')
 )
-st.plotly_chart(fig3, use_container_width=True)
+st.plotly_chart(fig3, use_container_width=True, config={'staticPlot': True})
 
 st.markdown("---")
 
