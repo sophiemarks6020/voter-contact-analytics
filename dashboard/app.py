@@ -435,7 +435,35 @@ with tab2:
         ["None"] + county_states
     )
 
-    if selected_drill_state != "None":
+    if sif selected_drill_state != "None":
+        county_df = conn.execute(f"""
+            SELECT * FROM mart_county_trends
+            WHERE state = '{selected_drill_state}'
+            ORDER BY dem_shift desc
+        """).df()
+
+        top3 = county_df.head(3)
+        bottom3 = county_df.tail(3).sort_values('dem_shift')
+        avg_shift = county_df['dem_shift'].mean()
+        counties_gained = len(county_df[county_df['dem_shift'] > 0])
+        total_counties = len(county_df)
+
+        st.info(f"""
+**{selected_drill_state.title()} Analysis**
+
+Democrats gained vote share in {counties_gained} of {total_counties} counties between 2016 and 2020,
+with an average shift of +{avg_shift:.2f}% across the state.
+
+The strongest gains came in {top3.iloc[0]['county_name'].title()} (+{top3.iloc[0]['dem_shift']}%),
+{top3.iloc[1]['county_name'].title()} (+{top3.iloc[1]['dem_shift']}%), and
+{top3.iloc[2]['county_name'].title()} (+{top3.iloc[2]['dem_shift']}%).
+
+The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({bottom3.iloc[0]['dem_shift']}%),
+{bottom3.iloc[1]['county_name'].title()} ({bottom3.iloc[1]['dem_shift']}%), and
+{bottom3.iloc[2]['county_name'].title()} ({bottom3.iloc[2]['dem_shift']}%).
+        """)
+
+        st.markdown(f"**{total_counties} counties in {selected_drill_state.title()}**")elected_drill_state != "None":
         county_df = conn.execute(f"""
             SELECT * FROM mart_county_trends
             WHERE state = '{selected_drill_state}'
