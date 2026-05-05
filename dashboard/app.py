@@ -284,7 +284,14 @@ fig4 = px.scatter(
 )
 fig4.update_traces(marker=dict(size=10, color='steelblue'),
                    selector=dict(mode='markers'))
-st.plotly_chart(fig4, use_container_width=True)
+fig4.update_layout(
+    xaxis=dict(fixedrange=True),
+    yaxis=dict(fixedrange=True)
+)
+st.plotly_chart(fig4, use_container_width=True, config={
+    'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+    'displayModeBar': False
+})
 
 st.markdown("---")
 
