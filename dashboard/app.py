@@ -305,6 +305,7 @@ display_df['rep_2016'] = display_df['rep_2016'].map(lambda x: f"{x}%")
 display_df['rep_2020'] = display_df['rep_2020'].map(lambda x: f"{x}%")
 display_df['dem_shift'] = display_df['dem_shift'].map(lambda x: f"{x}%")
 display_df['rep_shift'] = display_df['rep_shift'].map(lambda x: f"{x}%")
+display_df['turnout_change'] = display_df['turnout_change'].map(lambda x: f"{int(x):,}")
 st.dataframe(display_df, use_container_width=True)
 
 st.markdown("---")
