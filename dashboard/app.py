@@ -223,6 +223,8 @@ if selected_states:
 elif selected_region != "All States":
     df = df[df['state'].isin(regions[selected_region])]
 
+st.sidebar.caption("Filters apply to the State Overview tab.")
+
 st.markdown("""
 <style>
 .stTabs [data-baseweb="tab-list"] {
