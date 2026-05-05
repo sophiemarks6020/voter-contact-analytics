@@ -470,8 +470,6 @@ The smallest shifts occurred in {bottom3.iloc[0]['county_name'].title()} ({botto
             ORDER BY dem_shift desc
         """).df()
 
-        st.markdown(f"**{len(county_df)} counties in {selected_drill_state.title()}**")
-
         fig5 = px.bar(
             county_df.sort_values('dem_shift'),
             x='dem_shift',
