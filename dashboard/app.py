@@ -238,7 +238,8 @@ fig2.update_traces(marker=dict(size=10))
 fig2.update_layout(
     dragmode='pan',
     xaxis=dict(fixedrange=False),
-    yaxis=dict(fixedrange=False)
+    yaxis=dict(fixedrange=False),
+    modebar_remove=['zoom', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']
 )
 st.plotly_chart(fig2, use_container_width=True, config={
     'scrollZoom': True,
