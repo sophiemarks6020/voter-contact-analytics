@@ -187,7 +187,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title(" U.S. Presidential Election Shift Analysis (2016-2020)")
-st.markdown("**Built for America Votes | Analyzing Democratic Vote Share Trends by State**")
+st.markdown("**Analyzing Democratic Vote Share Trends by State**")
 
 st.markdown("---")
 
