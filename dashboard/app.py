@@ -176,6 +176,16 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown("""
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KTSZ59GX5D"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KTSZ59GX5D');
+</script>
+""", unsafe_allow_html=True)
+
 st.title(" U.S. Presidential Election Shift Analysis (2016-2020)")
 st.markdown("**Built for America Votes | Analyzing Democratic Vote Share Trends by State**")
 
