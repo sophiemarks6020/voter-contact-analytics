@@ -241,10 +241,30 @@ st.markdown("""
     border-radius: 6px;
     color: #555;
 }
+.stTabs [data-baseweb="tab-list"] {
+    gap: 16px;
+    background-color: #2E4057;
+    padding: 12px 24px;
+    border-radius: 10px;
+    justify-content: center;
+}
+.stTabs [data-baseweb="tab"] {
+    height: 52px;
+    padding: 0px 32px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 8px;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
 .stTabs [aria-selected="true"] {
     background-color: #ffffff;
-    color: #1a1a2e;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: #2E4057;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.stTabs [aria-selected="false"]:hover {
+    background-color: rgba(255,255,255,0.15);
+    color: #ffffff;
 }
 </style>
 """, unsafe_allow_html=True)
